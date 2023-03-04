@@ -5,6 +5,7 @@ import com.driver.repository.ConnectionRepository;
 import com.driver.repository.ServiceProviderRepository;
 import com.driver.repository.UserRepository;
 import com.driver.services.ConnectionService;
+import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ public class ConnectionServiceImpl implements ConnectionService {
     ConnectionRepository connectionRepository2;
 
     @Override
-    public User connect(int userId, String countryName) throws Exception {
+    public User connect(int userId, String countryName) throws Exception{
 
         User user = userRepository2.findById(userId).get();
         if(user.getMaskedIp()!=null){
@@ -77,72 +78,60 @@ public class ConnectionServiceImpl implements ConnectionService {
     }
     @Override
     public User disconnect(int userId) throws Exception {
-
-        User user=userRepository2.findById(userId).get();
+        User user = userRepository2.findById(userId).get();
         if(user.getConnected()==false){
-            throw new Exception("Already dissconnected");
+            throw new Exception("Already disconnected");
         }
-
         user.setMaskedIp(null);
         user.setConnected(false);
         userRepository2.save(user);
-
         return user;
-
     }
     @Override
     public User communicate(int senderId, int receiverId) throws Exception {
-
-        User user=userRepository2.findById(senderId).get();
-        User user1=userRepository2.findById(receiverId).get();
+        User user = userRepository2.findById(senderId).get();
+        User user1 = userRepository2.findById(receiverId).get();
 
         if(user1.getMaskedIp()!=null){
-            String str=user1.getMaskedIp();
-            String cc=str.substring(0,3);  //getting countrycode
+            String str = user1.getMaskedIp();
+            String cc = str.substring(0,3); //chopping country code = cc
 
-            if(cc.equals(user.getOriginalCountry().getCode())){
+            if(cc.equals(user.getOriginalCountry().getCode()))
                 return user;
-            }
-            else{
-                String countryName="";
+            else {
+                String countryName = "";
 
-                if(cc.equals(CountryName.IND.toCode())){
-                    countryName=CountryName.IND.toString();
-                }
-                if(cc.equals(CountryName.USA.toCode())){
-                    countryName=CountryName.USA.toString();
-                }
-                if(cc.equals(CountryName.JPN.toCode())){
-                    countryName=CountryName.JPN.toString();
-                }
-                if(cc.equals(CountryName.CHI.toCode())){
-                    countryName=CountryName.CHI.toString();
-                }
-                if(cc.equals(CountryName.AUS.toCode())){
-                    countryName=CountryName.AUS.toString();
-                }
+                if (cc.equalsIgnoreCase(CountryName.IND.toCode()))
+                    countryName = CountryName.IND.toString();
+                if (cc.equalsIgnoreCase(CountryName.USA.toCode()))
+                    countryName = CountryName.USA.toString();
+                if (cc.equalsIgnoreCase(CountryName.JPN.toCode()))
+                    countryName = CountryName.JPN.toString();
+                if (cc.equalsIgnoreCase(CountryName.CHI.toCode()))
+                    countryName = CountryName.CHI.toString();
+                if (cc.equalsIgnoreCase(CountryName.AUS.toCode()))
+                    countryName = CountryName.AUS.toString();
 
-                User user2=connect(senderId,countryName);
-                if(!user2.getConnected()){
+                User user2 = connect(senderId,countryName);
+                if (!user2.getConnected()){
                     throw new Exception("Cannot establish communication");
+
                 }
-                else{
-                    return user2;
-                }
+                else return user2;
             }
+
         }
         else{
             if(user1.getOriginalCountry().equals(user.getOriginalCountry())){
                 return user;
             }
-            String countryName=user1.getOriginalCountry().getCountryName().toString();
-            User user2=connect(senderId,countryName);
-            if(!user2.getConnected()){
+            String countryName = user1.getOriginalCountry().getCountryName().toString();
+            User user2 =  connect(senderId,countryName);
+            if (!user2.getConnected()){
                 throw new Exception("Cannot establish communication");
             }
-            else{
-                return user2;
-            }
+            else return user2;
+
         }
     }
 }
