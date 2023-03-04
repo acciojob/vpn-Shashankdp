@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
                 country.setCode(CountryName.AUS.toCode());
             }
             country.setUser(user);  //linking reverse
-            user.setCountry(country);
+            user.setOriginalCountry(country);
             user.setConnected(false);   // main goal of the vpn
 
             String code=country.getCode()+"."+userRepository3.save(user).getId();
