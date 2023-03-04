@@ -1,5 +1,9 @@
 package com.driver.services.impl;
 
+import com.driver.model.Country;
+import com.driver.model.CountryName;
+import com.driver.model.ServiceProvider;
+import com.driver.model.User;
 import com.driver.repository.CountryRepository;
 import com.driver.repository.ServiceProviderRepository;
 import com.driver.repository.UserRepository;
@@ -20,10 +24,61 @@ public class UserServiceImpl implements UserService {
     @Override
     public User register(String username, String password, String countryName) throws Exception{
 
+        User user=new User();
+        if(countryName.equals("IND") || countryName.equals("USA") || countryName.equals("JPN") || countryName.equals("AUS") || countryName.equals("CHI")){
+            user.setUsername(username);
+            user.setPassword(password);
+
+            Country country=new Country();
+            if(countryName.equals("IND")){
+                country.setCountryName(CountryName.IND);
+                country.setCode(CountryName.IND.toCode());
+            }
+            if(countryName.equals("USA")){
+                country.setCountryName(CountryName.USA);
+                country.setCode(CountryName.USA.toCode());
+            }
+            if(countryName.equals("JPN")){
+                country.setCountryName(CountryName.JPN);
+                country.setCode(CountryName.JPN.toCode());
+            }
+            if(countryName.equals("CHI")){
+                country.setCountryName(CountryName.CHI);
+                country.setCode(CountryName.CHI.toCode());
+            }
+            if(countryName.equals("AUS")){
+                country.setCountryName(CountryName.AUS);
+                country.setCode(CountryName.AUS.toCode());
+            }
+            country.setUser(user);  //linking reverse
+            user.setCountry(country);
+            user.setConnected(false);   // main goal of the vpn
+
+            String code=country.getCode()+"."+userRepository3.save(user).getId();
+            user.setOriginalIp(code);  //new one
+
+            userRepository3.save(user);
+        }
+
+        else{ // means user is null
+            throw new Exception("Country not found");
+        }
+        return user;
+
+
     }
 
     @Override
     public User subscribe(Integer userId, Integer serviceProviderId) {
 
+        User user=userRepository3.findById(userId).get();
+        ServiceProvider serviceProvider=serviceProviderRepository3.findById(serviceProviderId).get();
+
+        user.getServiceProviderList().add(serviceProvider);
+        serviceProviderRepository3.save(serviceProvider);
+
+        serviceProviderRepository3.save(serviceProvider);
+
+        return user;
     }
 }
